@@ -1,0 +1,618 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum Race {
+    BRANCO
+    PRETO
+    PARDO
+    AMARELO
+    INDIGENA
+}
+
+enum MaritalStatus {
+    SOLTEIRO
+    CASADO
+    SEPARADO
+    DIVORCIADO
+    VIUVO
+}
+
+enum Gender {
+    MASCULINO
+    FEMININO
+    OUTRO
+}
+
+enum Schooling {
+    NAO_ALFABETIZADO
+    SABE_LER_E_ESCREVER
+    FUNDAMENTAL_INCOMPLETO
+    FUNDAMENTAL_COMPLETO
+    MEDIO_INCOMPLETO
+    MEDIO_COMPLETO
+    SUPERIOR_INCOMPLETO
+    SUPERIOR_COMPLETO
+    POS_GRADUACAO
+    NAO_SABE_NAO_RESPONDEU
+    MESTRADO
+    DOUTORADO
+    POS_DOUTORADO
+}
+
+enum BrushingFrequency {
+    UMA_VEZ
+    DUAS_VEZES
+    TRES_VEZES_OU_MAIS_VEZES
+}
+
+enum BrushType {
+    INDIVIDUAL
+    COLETIVA
+}
+
+enum BrushChange {
+    TODO_MES
+    DOIS_EM_DOIS_MESES
+    TRES_EM_TRES_MESES_OU_MAIS
+    NAO_SABE
+}
+
+enum ClinicalExaminationDentistry {
+    NORMAL
+    ALTERADA
+}
+
+enum OdontogramType {
+    CARIADO
+    HIGIDO
+    AUSENTE
+    RESTAURADO
+    MANCHA_BRANCA
+}
+
+enum PsychologyEnum {
+    MUITO_RUIM
+    RUIM
+    NEM_RUIM_NEM_BOA
+    BOA
+    MUITO_BOA
+}
+
+enum Feeling {
+    BONS
+    RUINS
+}
+
+enum BloodType {
+    A_POSITIVO
+    A_NEGATIVO
+    B_POSITIVO
+    B_NEGATIVO
+    AB_POSITIVO
+    AB_NEGATIVO
+    O_POSITIVO
+    O_NEGATIVO
+}
+
+enum Allergies {
+    SIM
+    NAO
+    NAO_SABE
+}
+
+enum PhysicalActivity {
+    SEDENTARIO
+    NAO_SEDENTARIO
+}
+
+model Person {
+    id String @id @default(cuid())
+
+    name       String?
+    socialName String?
+    birthDate  DateTime?
+    gender     String?
+
+    raceColor  String?
+    religion   String?
+    Birthplace String?
+
+    susCard String?
+    phone   String?
+    class   String?
+
+    isChild Boolean @default(false)
+
+    // SOMENTE PARA CRIANCA
+    responsibleId String?
+    responsible   Person?  @relation("PersonResponsibility", fields: [responsibleId], references: [id])
+    childrenList  Person[] @relation("PersonResponsibility")
+
+    // SOMENTE PARA ADULTO
+    profession                   String?
+    maritalStatus                String?
+    liveTogether                 Boolean? @default(false)
+    children                     Int?
+    agesOfChildren               Int[]    @default([])
+    schooling                    String?
+    healthPlan                   String?
+    conditionsAccessTreatedWater String?
+    accessToTreatedWater         Boolean?
+    accessToSewage               Boolean?
+
+    status    String   @default("active")
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    DentalAnamnesis        DentalAnamnesis?
+    PsychologicalAnamnesis PsychologicalAnamnesis?
+    MedicalAnamnesis       MedicalAnamnesis?
+    DocumentsEmission      DocumentsEmission?
+    Entrepreneurship       Entrepreneurship?
+    physiotherapyAnamnesis physiotherapyAnamnesis?
+    AtendimentoMedico      AtendimentoMedico[]
+    TriagemNutricional     TriagemNutricional[]
+}
+
+model DentalAnamnesis {
+    id     String @id @default(cuid())
+    userId String @unique
+
+    complaint               String?
+    isToothache             String?
+    isGumPain               String?
+    isGumsBleedWhenBrushing String?
+    isUseToothpaste         String?
+    isUseDentalFloss        String?
+    brushingFrequency       String?
+    brushType               String?
+    brushChange             String?
+    isUsePacifier           String?
+    eatingHabits            String?
+    isAllergic              String?
+    allergy                 String?
+
+    dentalTreatmentStatus String?
+    dentalTreatment       String?
+
+    gum          String?
+    gumObs       String?
+    jugalMucosa  String?
+    jugalObs     String?
+    palate       String?
+    palateObs    String?
+    floor        String?
+    floorObs     String?
+    tongue       String?
+    tongueObs    String?
+    fluorosis    String?
+    fluorosisObs String?
+
+    teeth Json[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    person Person  @relation(fields: [userId], references: [id], onDelete: Cascade)
+    Tooth  Tooth[]
+}
+
+model Tooth {
+    id          String  @id @default(cuid())
+    label       String?
+    zone        String?
+    observation String?
+
+    createdAt         DateTime         @default(now())
+    updatedAt         DateTime         @updatedAt
+    DentalAnamnesis   DentalAnamnesis? @relation(fields: [dentalAnamnesisId], references: [id])
+    dentalAnamnesisId String?
+}
+
+model PsychologicalAnamnesis {
+    id     String @id @default(cuid())
+    userId String @unique
+
+    feeling              String?
+    opportunitiesLeisure String?
+    sleepQuality         String?
+
+    isPerformsPhysicalActivity String?
+    physicalActivities         String?
+    selfCare                   String?
+    typesOfThinking            String?
+    haveSupportPeople          String?
+    supportPeople              String?
+
+    doesPsychologicalFollowUp String?
+    doesPsychiatricFollowUp   String?
+
+    isUseMedication String?
+    wouldSeekHelp   String?
+
+    observation String?
+
+    guidance       String?
+    whatCanWeOffer String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    person Person @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model MedicalAnamnesis {
+    id     String @id @default(cuid())
+    userId String @unique
+
+    bloodType    String?
+    priorIllness String?
+
+    previousHospitalizations          String?
+    reasonForPreviousHospitalizations String?
+    previousSurgeries                 String?
+    reasonForPreviousSurgeries        String?
+
+    injuries String?
+
+    allergies String?
+    allergy   String?
+
+    familyDiseases String?
+
+    physicalActivity String?
+    smoking          String?
+    smokersOf        String?
+
+    etilismo              String?
+    vaccineScheduleUpdate String?
+    typeOfHouse           String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    person Person @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model DocumentsEmission {
+    id     String @id @default(cuid())
+    userId String @unique
+
+    isHaveBirthCertificate Boolean @default(false)
+    BirthCertificateObs    String?
+
+    isLiveInTheCommunity Boolean? @default(false)
+
+    isHaveRg            Boolean? @default(false)
+    rgNumber            String?
+    isHaveCpf           Boolean? @default(false)
+    cpfNumber           String?
+    doesNotHaveCpfandRg Boolean? @default(false)
+    dontHaveRgCpfObs    String?
+
+    whichWayIsNeeded String?
+
+    isHaveSusCard Boolean? @default(false)
+
+    isHaveVaccinationCard Boolean? @default(false)
+    // contact                String?
+
+    //  APENAS PARA ADULTO
+    isHaveElectedTitle Boolean? @default(false)
+    isHaveCTPS         Boolean? @default(false)
+    lostDocument       Boolean?
+
+    pendingDocuments String?
+    other            String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    person Person @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Entrepreneurship {
+    id     String @id @default(cuid())
+    userId String @unique
+
+    familyincome                          String?
+    familyincomeOBS                       String?
+    paidActivity                          String?
+    paidActivityWhich                     String?
+    activityUsingRecyclableMaterials      String?
+    activityUsingRecyclableMaterialsWhich String?
+    activityUsingRecyclableMaterialsWhere String?
+    craftsCuttingSewingCustomization      String?
+    craftsCuttingSewingCustomizationWhich String?
+    investInSellingProduct                String?
+    investInSellingProductWhich           String?
+    cooperativeAssociation                String?
+    cooperativeAssociationWhich           String?
+    knowAboutEntrepreneurship             String?
+    desireToUndertake                     String?
+    desireToUndertakeWhich                String?
+    opportunitiesToCreateYourOwnBusiness  String?
+    profile                               String?
+    profileOther                          String?
+    interestInParticipating               String?
+    interestInParticipatingWhich          String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    person Person @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model physiotherapyAnamnesis {
+    id     String @id @default(cuid())
+    userId String @unique
+
+    complaintMain      String?
+    complaintSecondary String?
+    hda                String?
+    medicinesUse       String?
+    personalBackground String?
+
+    painAssessment          String?
+    painAssessmentIntensity String?
+    painLocation            String?
+    painIntensity           String?
+    painFrequency           String?
+    painFeature             String?
+
+    specificInspection    String?
+    specificInspectionObs String?
+
+    weight String?
+    height String?
+    pa     String?
+    fc     String?
+    fr     String?
+    ap     String?
+
+    posturalEvaluation    String?
+    posturalEvaluationObs String?
+
+    thinFeel            String?
+    fineStop            String?
+    movementRestriction String?
+    perception          String?
+
+    // 12
+    jointMovement1 String?
+    preserved1E    String?
+    preserved1D    String?
+    diminished1E   String?
+    diminished1D   String?
+
+    jointMovement2 String?
+    preserved2E    String?
+    preserved2D    String?
+    diminished2E   String?
+    diminished2D   String?
+
+    jointMovement3 String?
+    preserved3E    String?
+    preserved3D    String?
+    diminished3E   String?
+    diminished3D   String?
+
+    jointMovement4 String?
+    preserved4E    String?
+    preserved4D    String?
+    diminished4E   String?
+    diminished4D   String?
+
+    jointMovement5 String?
+    preserved5E    String?
+    preserved5D    String?
+    diminished5E   String?
+    diminished5D   String?
+
+    jointMovement6 String?
+    preserved6E    String?
+    preserved6D    String?
+    diminished6E   String?
+    diminished6D   String?
+
+    jointMovement7 String?
+    preserved7E    String?
+    preserved7D    String?
+    diminished7E   String?
+    diminished7D   String?
+
+    jointMovement8 String?
+    preserved8E    String?
+    preserved8D    String?
+    diminished8E   String?
+    diminished8D   String?
+
+    jointMovement9 String?
+    preserved9E    String?
+    preserved9D    String?
+    diminished9E   String?
+    diminished9D   String?
+
+    jointMovement10 String?
+    preserved10E    String?
+    preserved10D    String?
+    diminished10E   String?
+    diminished10D   String?
+
+    jointMovement11 String?
+    preserved11E    String?
+    preserved11D    String?
+    diminished11E   String?
+    diminished11D   String?
+
+    jointMovement12 String?
+    preserved12E    String?
+    preserved12D    String?
+    diminished12E   String?
+    diminished12D   String?
+
+    memberTested1     String?
+    degreeOfStrength1 String?
+    memberTested2     String?
+    degreeOfStrength2 String?
+    memberTested3     String?
+    degreeOfStrength3 String?
+    memberTested4     String?
+    degreeOfStrength4 String?
+    memberTested5     String?
+    degreeOfStrength5 String?
+
+    generalObservation String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    person Person @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AtendimentoMedico {
+    id     String @id @default(cuid())
+    userId String
+
+    data                 String?
+    peso                 String?
+    altura               String?
+    imc                  String?
+    pressaoArterial      String?
+    queixaPrincipal      String?
+    evolucao             String?
+    isda                 String?
+    exameFisico          String?
+    geral                String?
+    auscultaCardiaca     String?
+    auscultaRespiratoria String?
+    abdominal            String?
+    hipoteseDiagnostica  String?
+    conduta              String?
+
+    medico String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    person Person @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model TriagemNutricional {
+    id     String @id @default(cuid())
+    userId String
+
+    acessoPostoSaude         String?
+    frequentaCentroSaude     String?
+    estadoProprioSaude       String?
+    fazParteGrupoCentroSaude String?
+    qualGrupoCentroSaude     String?
+
+    deixoFazerAtividadePorMotivoSaude String?
+    quantosDiasDeixoDeFazerAtividade  String?
+
+    principaisMotivosQueImpediu String?
+
+    acamado String?
+
+    quandoEstaDoenteProcura String?
+
+    frequenciaComidaEnlatada               String?
+    frequenciaLegume                       String?
+    // 1
+    precupacaoFaltaAlimento                String?
+    // 2
+    faltaramAlimento                       String?
+    // 3
+    faltaramAlimentoPorDinheiro            String?
+    // 4
+    apenasAlgunsAlimentosPorDinheiro       String?
+    // 5 
+    adultoFaltouPorDinheiro                String?
+    // 6
+    adultoApenasAlgunsAlimentosPorDinheiro String?
+
+    // 7
+    perguntaUm     String?
+    // 8
+    perguntaDois   String?
+    // 9
+    perguntaTres   String?
+    // 10
+    perguntaQuatro String?
+    // 11
+    perguntaCinco  String?
+    // 12
+    perguntaSeis   String?
+    // 13
+    perguntaSete   String?
+    // 14
+    perguntaOito   String?
+
+    principaisMotivosQueImpediuOutro String?
+    how                              String?
+
+    idade  String?
+    peso   String?
+    alturo String?
+    imc    String?
+    cq     String?
+    cc     String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    person Person @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Necessary for Next auth
+model Account {
+    id                String  @id @default(cuid())
+    userId            String
+    type              String
+    provider          String
+    providerAccountId String
+    // role              Role    @default(USER)
+    refresh_token     String? // @db.Text
+    access_token      String? // @db.Text
+    expires_at        Int?
+    token_type        String?
+    scope             String?
+    id_token          String? // @db.Text
+    session_state     String?
+    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([provider, providerAccountId])
+}
+
+model Session {
+    id           String   @id @default(cuid())
+    sessionToken String   @unique
+    userId       String
+    expires      DateTime
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+    id            String    @id @default(cuid())
+    name          String?
+    email         String?   @unique
+    emailVerified DateTime?
+    image         String?
+    accounts      Account[]
+    sessions      Session[]
+}
+
+model VerificationToken {
+    identifier String
+    token      String   @unique
+    expires    DateTime
+
+    @@unique([identifier, token])
+}
